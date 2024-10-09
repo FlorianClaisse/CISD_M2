@@ -1,0 +1,1 @@
+- Ces fichiers sont la version corrigée des programmes des exercices C (dossier `debug/`) dans la feuille `exercices_slurm-debug.md`.

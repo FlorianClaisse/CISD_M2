@@ -1,0 +1,21 @@
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --ntasks=4
+#SBATCH --time=00:10:00
+#SBATCH --cpus-per-task=1
+#SBATCH -C miriel
+#SBATCH --output=log_hello_out
+#SBATCH --error=log_hello_err
+
+# Load dependencies
+module load compiler/gcc/9.3.0
+module load mpi/openmpi/3.1.4-all
+
+# cd in the project folder
+cd $HOME/Programming/slurm
+
+# compile
+mpicc -O3 hello.c -o program_hello
+
+# run
+mpirun ./program_hello

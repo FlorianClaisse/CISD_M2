@@ -1,0 +1,21 @@
+#!/bin/bash
+#SBATCH --time=01:00:00
+#SBATCH --cpus-per-task=1
+#SBATCH --exclusive
+#SBATCH -C miriel
+
+# Get input parameter
+Nxtot=$1
+
+# Load dependencies
+module load compiler/gcc/9.3.0
+module load mpi/openmpi/3.1.4-all
+
+# cd in the project folder
+cd $HOME/Programming/slurm
+
+## compile
+#mpicc -O3 ring.c -lm -o program_ring
+
+# run
+mpirun --mca mtl psm ./program_ring $Nxtot
