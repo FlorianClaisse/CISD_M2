@@ -8,10 +8,10 @@
 
 #define START 1
 #define END 100000000
+#define PI25DT 3.141592653589793238462643
 
 void defaultt() {
     double x, pi, sum = 0.0;
-    double PI25DT = 3.141592653589793238462643;
 
     double step = 1.0 / (double) END;
     
@@ -23,12 +23,11 @@ void defaultt() {
     double end = omp_get_wtime();
     
     pi = step * sum; 
-    printf("default: pi := %.16e  %.e, time = %f", pi, fabs(pi - PI25DT), (end - start));
+    printf("default: pi := %.16e  %.e, time = %f\n", pi, fabs(pi - PI25DT), (end - start));
 }
 
 void thread() {
     double x, pi = 0.0;
-    double PI25DT = 3.141592653589793238462643;
     const int nb_threads = omp_get_max_threads();
     double sum[nb_threads];
     double global_sum = 0;
@@ -55,7 +54,6 @@ void thread() {
 
 void atomic() {
     double x, pi = 0.0;
-    double PI25DT = 3.141592653589793238462643;
     double sum = 0;
     double step = 1.0 / (double) END;
     
@@ -74,7 +72,6 @@ void atomic() {
 
 void redution() {
     double x, pi = 0.0;
-    double PI25DT = 3.141592653589793238462643;
     double sum = 0;
     double step = 1.0 / (double) END;
     
@@ -84,10 +81,29 @@ void redution() {
         x = (i - 0.5) * step;
         sum = sum + 4.0 / (1.0 + x * x);
     }
-    start = omp_get_wtim() - start;
+    start = omp_get_wtime() - start;
 
     pi = step * sum;
     printf("reduction: pi := %.16e  %.e, time = %f", pi, fabs(pi - PI25DT), start);
+}
+
+void task() {
+    double x, pi = 0.0;
+    double sum = 0;
+    double step = 1.0 / (double) END;
+    
+    double start = omp_get_wtime();
+    #pragma omp parallel
+    #pragma omp single
+    #pragma omp parallel for shared(step) firstprivate(x) reduction(+: sum)
+    for (int i = START; i <= END; i++) {
+        x = (i - 0.5) * step;
+        sum = sum + 4.0 / (1.0 + x * x);
+    }
+    start = omp_get_wtime() - start;
+
+    pi = step * sum;
+    printf("task: pi := %.16e  %.e, time = %f", pi, fabs(pi - PI25DT), start);
 }
 
 
