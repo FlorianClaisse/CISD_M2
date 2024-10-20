@@ -39,15 +39,17 @@ int main(int argc,char **argv) {
     }
 
     #pragma omp parallel shared(array)
-    #pragma omp single
-    {   
-        for (int row = 1; row <= n; row++) {
-            array[row][row] = 1;
-            array[row][1] = 1;
-            
-            for (int col = 2; col < row; col++)
-                #pragma omp task depend(in: array[row - 1][col - 1], array[row - 1][col]) depend(out: array[row][col])
-                array[row][col] = array[row - 1][col - 1] + array[row - 1][col];
+    {
+        #pragma omp single
+        {   
+            for (int row = 1; row <= n; row++) {
+                array[row][row] = 1;
+                array[row][1] = 1;
+                
+                for (int col = 2; col < row; col++)
+                    #pragma omp task depend(in: array[row - 1][col - 1], array[row - 1][col]) depend(out: array[row][col])
+                    array[row][col] = array[row - 1][col - 1] + array[row - 1][col];
+            }
         }
     }
     

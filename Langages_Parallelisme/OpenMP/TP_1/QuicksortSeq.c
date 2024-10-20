@@ -45,6 +45,18 @@ int Partition (int p, int r) {
 }
 
 void Quicksort(int p, int r) {
+    if (p < THRESHOLD)
+        SeqQuicksort(p, r);
+    else {
+        int q = Partition(p, r);
+        #pragma omp task
+        Quicksort(p, q - 1);
+        #pragma omp task
+        Quicksort(q + 1, r);
+    }
+}
+
+void SeqQuicksort(int p, int r) {
     if (p < r) {  
         int q = Partition(p, r); // indice du pivot 
         Quicksort(p, q-1);       
@@ -72,8 +84,11 @@ int main(int argc, char* argv[]) {
     
     printf("\n\n");
   
-  
-    Quicksort(0, N-1);
+    #pragma omp parallel
+    {
+        #pragma omp single
+        Quicksort(0, N - 1);
+    }
   
     for (int j = 0; j < N; j++) printf("%3d ",A[j]);
         printf("\n\n");

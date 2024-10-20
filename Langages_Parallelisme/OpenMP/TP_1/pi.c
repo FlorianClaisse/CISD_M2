@@ -38,13 +38,17 @@ void thread() {
         sum[i] = 0;
     
     double start = omp_get_wtime();
-    #pragma omp parallel for schedule(static) shared(step, sum) private(x)
-    for (int i = START; i <= END; i++) {
-        x = (i - 0.5) * step;
-        sum[omp_get_thread_num()] = sum[omp_get_thread_num()] + 4.0 / (1.0 + x * x);
+    #pragma omp parallel shared(step, sum)
+    {
+        int id = omp_get_thread_num();
+        #pragma omp for private(x)
+        for (int i = START; i <= END; i++) {
+            x = (i - 0.5) * step;
+            sum[id] += 4.0 / (1.0 + x * x);
+        }
     }
     double end = omp_get_wtime();
-    
+
     for (int i = 0; i < nb_threads; i++) 
         global_sum += sum[i];
 
@@ -54,15 +58,20 @@ void thread() {
 
 void atomic() {
     double x, pi = 0.0;
-    double sum = 0;
+    double sumtmp, sum = 0;
     double step = 1.0 / (double) END;
     
     double start = omp_get_wtime();
-    #pragma omp parallel for schedule(static) shared(sum, step) private(x)
-    for (int i = START; i <= END; i++) {
-        x = (i - 0.5) * step;
+    #pragma omp parallel default(none) private(sumtmp) shared(step, sum)
+    {
+        sumtmp = 0;
+        #pragma omp for private(x) nowait
+        for (int i = START; i <= END; i++) {
+            x = (i - 0.5) * step;
+            sumtmp += 4.0 / (1.0 + x * x);
+        }
         #pragma omp atomic update
-        sum = sum + 4.0 / (1.0 + x * x);
+        sum += sumtmp;
     }
     double end = omp_get_wtime();
 
@@ -76,7 +85,7 @@ void redution() {
     double step = 1.0 / (double) END;
     
     double start = omp_get_wtime();
-    #pragma omp parallel for schedule(static) shared(step) firstprivate(x) reduction(+: sum)
+    #pragma omp parallel for default(none) private(x) shared(step) reduction(+: sum)
     for (int i = START; i <= END; i++) {
         x = (i - 0.5) * step;
         sum = sum + 4.0 / (1.0 + x * x);

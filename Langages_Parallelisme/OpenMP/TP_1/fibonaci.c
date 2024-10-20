@@ -25,9 +25,11 @@ int main() {
     int n = 25;
     int nthreads;
 
-    #pragma omp parallel
-    #pragma omp single
-    result = comp_fib_numbers(n);
+    #pragma omp parallel shared(nthreads)
+    {
+        #pragma omp single nowait
+        result = comp_fib_numbers(n);
+    }
 
     printf("Result for n = %d: %ld \n", n, result);
 }
