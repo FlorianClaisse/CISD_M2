@@ -1,5 +1,3 @@
-#include <assert.h>
-#include <stdbool.h>
 ////////////////////////////////////////////////////
 typedef struct block {
   int shape[2]; // the shape of the block
@@ -69,7 +67,7 @@ void to_tiled(int N, value_type *A, tiled_matrix *Ablock, int BS) {
   // printMat(N, A);
   int nb_block = N / BS;
   if (N % BS != 0) {
-    printf(" NS doit diviser N ! res = ",N % BS);
+    printf(" NS doit diviser N !");
     exit(EXIT_FAILURE);
   }
   // printf("nb_block: %d\n", nb_block);
@@ -164,16 +162,6 @@ void reset_tilted_matrix(struct tiled_matrix *Ablock) {
     }
   }
 }
-
-// Compare deux matrices denses 
-value_type compareMat(int N, value_type *A, value_type *B) {
-  value_type err = 0.0;
-  for (int i = 0; i < N * N; ++i) {
-    err = fmax(fabsf(A[i] - B[i]), err);
-  }
-  return err;
-}
-// Compare deux ùatrices blocs
 bool compare(struct tiled_matrix *Ablock, struct tiled_matrix *Bblock) {
   value_type tmp, err;
   err=0.0;
